@@ -1,0 +1,2 @@
+pyglet==1.5.7
+neat-python==0.92
