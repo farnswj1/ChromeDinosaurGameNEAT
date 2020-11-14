@@ -3,6 +3,6 @@ This is a Python-based implementation of the dinosaur game featured on Google Ch
 
 To play the game manually, enter the command `python main.py`
 
-To run the game using NEAT, enter the command 'python main.py neat'
+To run the game using NEAT, enter the command `python main.py neat`
 
 NOTE: All other arguments will default to the player playing the game manually!
