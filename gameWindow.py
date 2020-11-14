@@ -458,6 +458,13 @@ class ChromeDinosaurGame(pyglet.window.Window):
             self.clouds.append(
                 GameSprite(self.cloud_img, 1200, randint(225, 325), velx=-150, batch=self.bg_batch)
             )
+            ''' 
+            The 2 ensures that the cloud spawns at least 2 seconds later
+            The random() function gives us a decimal number between 0 and 1 
+            so by multiplying it by 3 and adding 2 to it
+            we get a random decimal number between 3 and 5
+            The idea was to have the clouds generate randomly and within an interval of time
+            '''
             self.next_cloud_spawn += 3 * random() + 2 # Reset delay
         
         # Update the obstacle spawn delay
