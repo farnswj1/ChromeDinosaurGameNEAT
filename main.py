@@ -13,10 +13,14 @@ in JavaScript.
 To play the game manually, type in the following command:
     python main.py
 
-To run the game using NEAT, type in the following command:
+To run the game using NEAT, add the argument 'neat' to the command. For example:
     python main.py neat
 
-NOTE: All other arguments will default to the player playing the game manually!
+To enable night mode, add the argument 'night' to the command. For example:
+    python main.py night
+
+To enable both NEAT and night mode, add both arguments to the command. 
+The order of these arguments do not matter.
 '''
 
 # Imported modules
@@ -26,12 +30,16 @@ from gameWindow import ChromeDinosaurGame
 # Execute the program if ran directly
 if __name__ == "__main__":
     # Check if the user has enabled or disabled the NEAT implementation
-    use_neat = (argv[1] == "neat") if len(argv) >= 2 else False
+    use_neat = ("neat" in argv)
+
+    # Check if the user has enabled night mode
+    night_mode = ("night" in argv)
 
     # Run the game
     ChromeDinosaurGame(
         width=1200,
         height=400,
         caption="Google Chrome Dinosaur Game",
-        enable_neat=use_neat
+        enable_neat=use_neat,
+        night_mode=night_mode
     )

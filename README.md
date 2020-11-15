@@ -3,6 +3,8 @@ This is a Python-based implementation of the dinosaur game featured on Google Ch
 
 To play the game manually, enter the command `python main.py`
 
-To run the game using NEAT, enter the command `python main.py neat`
+To run the game using NEAT, add the argument `neat`. For example: `python main.py neat`
 
-NOTE: All other arguments will default to the player playing the game manually!
+To enable night mode, add the argument `night`. For example: `python main.py night`
+
+To enable both NEAT and night mode, add both arguments to the command. The order of these arguments do not matter.

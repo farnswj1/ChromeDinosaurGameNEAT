@@ -21,7 +21,7 @@ from random import random, randint, choice
 
 # Chrome dinosaur window class
 class ChromeDinosaurGame(pyglet.window.Window):
-    def __init__(self, enable_neat=False, *args, **kwargs):
+    def __init__(self, enable_neat=False, night_mode=False, *args, **kwargs):
         # Inherit the pyglet window
         super().__init__(*args, **kwargs)
 
@@ -118,6 +118,7 @@ class ChromeDinosaurGame(pyglet.window.Window):
             f"{self.score:05}",
             font_name="Press Start 2P",
             font_size=20,
+            color=(255, 255, 255, 255) if night_mode else (0, 0, 0, 255),
             x=self.width - 10,
             y=self.height - 10,
             anchor_x="right",
@@ -131,6 +132,7 @@ class ChromeDinosaurGame(pyglet.window.Window):
                 "G A M E  O V E R",
                 font_name="Press Start 2P",
                 font_size=30,
+                color=(255, 255, 255, 255) if night_mode else (0, 0, 0, 255),
                 x=self.width / 2,
                 y=self.height / 2 + 100,
                 anchor_x="center",
@@ -183,6 +185,10 @@ class ChromeDinosaurGame(pyglet.window.Window):
         self.next_obstacle_spawn = 2 * random() + 1
         self.next_velocity_increase = 1
 
+        # Change the background color to white unless the user selects night mode
+        if not night_mode:
+            pyglet.gl.glClearColor(1, 1, 1, 1)
+
         # Set up the NEAT algorithm if true. Otherwise, let the user play manually
         if self.enable_neat:
             # Locate the NEAT configuration file
@@ -210,6 +216,7 @@ class ChromeDinosaurGame(pyglet.window.Window):
                 f"GENERATION: {self.generation:02}",
                 font_name="Press Start 2P",
                 font_size=20,
+                color=(255, 255, 255, 255) if night_mode else (0, 0, 0, 255),
                 x=10,
                 y=self.height - 10,
                 anchor_x="left",
@@ -223,6 +230,7 @@ class ChromeDinosaurGame(pyglet.window.Window):
                 f"DINOSAURS: {self.number_of_dinosaurs:03}",
                 font_name="Press Start 2P",
                 font_size=20,
+                color=(255, 255, 255, 255) if night_mode else (0, 0, 0, 255),
                 x=10,
                 y=self.height - 40,
                 anchor_x="left",
