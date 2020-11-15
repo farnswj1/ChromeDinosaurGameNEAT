@@ -10,6 +10,7 @@ This is a subclass of the window class in pyglet.
 import pyglet
 import neat
 import os
+import pickle
 from pyglet.window import key, mouse, FPSDisplay
 from pyglet.image import ImageGrid, Animation
 from gameObject import GameSprite
@@ -230,6 +231,14 @@ class ChromeDinosaurGame(pyglet.window.Window):
             )
             # Run the NEAT algorithm and find the best "player"
             winner = population.run(self.eval_genomes, 25)
+
+            # Print the genome that performed the best
+            print(f"\nBest genome:\n{winner}")
+
+            # Save the AI if it does very well (over 16,000 points in the game)
+            if winner.fitness > 1500:
+                with open("winner.pkl", "wb") as f:
+                    pickle.dump(winner, f)
         else:
             # Run the main loop and play the game manually
             pyglet.app.run()
