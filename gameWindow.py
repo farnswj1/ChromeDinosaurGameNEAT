@@ -152,7 +152,7 @@ class ChromeDinosaurGame(pyglet.window.Window):
             velx=self.obstacle_velx,
             batch=self.bg_batch
         )
-        self.moon = GameSprite(next(self.moon_phases), 2920, 275, velx=-20, batch=self.main_batch)
+        self.moon = GameSprite(next(self.moon_phases), 2920, 275, velx=-20, batch=self.bg_batch)
         self.clouds = [] # Elements will be randomly generated as the game progresses
         self.obstacles = [] # Elements will be randomly generated as the game progresses
         
@@ -185,7 +185,7 @@ class ChromeDinosaurGame(pyglet.window.Window):
         # Set up the NEAT algorithm if true. Otherwise, let the user play manually
         if self.enable_neat:
             # Locate the NEAT configuration file
-            config_file = os.path.join(os.path.dirname(__file__), 'config-feedforward.txt')
+            config_file = os.path.join(os.path.dirname(__file__), "neat_config.txt")
 
             # Configure the NEAT algorithm
             config = neat.config.Config(
