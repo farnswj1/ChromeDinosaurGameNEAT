@@ -110,6 +110,11 @@ class ChromeDinosaurGame(pyglet.window.Window):
             game_sprites.get_region(994, 47, 40, 82),
             game_sprites.get_region(954, 47, 40, 82)
         ))
+        self.star_imgs = (
+            game_sprites.get_region(1274, 74, 18, 18),
+            game_sprites.get_region(1274, 92, 18, 18),
+            game_sprites.get_region(1274, 110, 18, 18)
+        )
         self.reset_button_img = game_sprites.get_region(2, 63, 72, 65)
 
         # Score and label
@@ -158,6 +163,7 @@ class ChromeDinosaurGame(pyglet.window.Window):
         self.moon = GameSprite(next(self.moon_phases), 2920, 275, velx=-20, batch=self.bg_batch)
         self.clouds = [] # Elements will be randomly generated as the game progresses
         self.obstacles = [] # Elements will be randomly generated as the game progresses
+        self.stars = [] # Elements will be generated when the moon appears on the screen
         
         # Reset button is only available when the user plays manually
         if not self.enable_neat:
@@ -183,7 +189,11 @@ class ChromeDinosaurGame(pyglet.window.Window):
         self.next_score_increment = 0.1
         self.next_cloud_spawn = 3 * random() + 1
         self.next_obstacle_spawn = 2 * random() + 1
+        self.next_star_spawn = 0 # Spawn a star immediately
         self.next_velocity_increase = 1
+
+        # Control the star opacity by increasing it at night 
+        self.star_opacity = 0
 
         # Change the background color to white unless the user selects night mode
         if not night_mode:
@@ -388,8 +398,8 @@ class ChromeDinosaurGame(pyglet.window.Window):
                 # Check each dinosaur for collisions
                 for dinosaur, neural_net, genome in zip(self.dinosaurs, self.neural_nets, self.genomes):
                     if self.collide(dinosaur, obstacle):
-                        # Remove any animations so that the sprite is properly removed
-                        dinosaur.change_image(self.dinosaur_jump_img)
+                        # Delete the image from video memory
+                        dinosaur.delete()
 
                         # Penalize the genome for the collision
                         genome.fitness -= 100
@@ -424,6 +434,7 @@ class ChromeDinosaurGame(pyglet.window.Window):
         # Update the clouds and delete those that run off the left side of the screen
         for cloud in self.clouds:
             if cloud.x + cloud.width < 0:
+                cloud.delete() # Delete the image from video memory
                 self.clouds.remove(cloud)
             else:
                 cloud.update(dt)
@@ -433,6 +444,21 @@ class ChromeDinosaurGame(pyglet.window.Window):
             self.moon.x += 3000
             self.moon.change_image(next(self.moon_phases))
         self.moon.update(dt)
+
+        # Update the star opacity variable before updating the stars
+        if self.moon.x < 1280:
+            self.star_opacity = min(self.star_opacity + (64 * dt), 255)
+        else:
+            self.star_opacity = max(self.star_opacity - (64 * dt), 0)
+
+        # Update the stars and delete those that run off the left side of the screen
+        for star in self.stars:
+            if star.x + star.width < 0:
+                star.delete() # Delete the image from video memory
+                self.stars.remove(star)
+            else:
+                star.update(dt)
+                star.opacity = round(self.star_opacity) # Opacity value must be an integer
 
         # Update the dinosaur(s)
         if self.enable_neat:
@@ -458,6 +484,7 @@ class ChromeDinosaurGame(pyglet.window.Window):
         # Update the obstacles and delete those that run off the left side of the screen
         for obstacle in self.obstacles:
             if obstacle.x + obstacle.width < 0:
+                obstacle.delete() # Delete the image from video memory
                 self.obstacles.remove(obstacle)
             else:
                 obstacle.update(dt)
@@ -509,6 +536,18 @@ class ChromeDinosaurGame(pyglet.window.Window):
                     )
                 )
             self.next_obstacle_spawn = 1.5 * random() + 1 # Reset delay
+        
+        # Update the star spawn delay
+        self.next_star_spawn -= dt
+        if self.next_star_spawn <= 0:
+            self.stars.append(
+                GameSprite(choice(self.star_imgs),
+                1200,
+                randint(200, 350),
+                velx=-10,
+                batch=self.bg_batch)
+            )
+            self.next_star_spawn += 20 * random() + 30 # Reset delay
 
         # Update the velocity increase delay
         self.next_velocity_increase -= dt
@@ -534,9 +573,9 @@ class ChromeDinosaurGame(pyglet.window.Window):
 
     # Reset the game
     def reset(self):
-        # To remove the bird animations, all sprites are changed to static images
+        # Delete the image from video memory
         for obstacle in self.obstacles:
-            obstacle.change_image(self.cacti_imgs[0])
+            obstacle.delete()
         
         # Clear the list of obstacles
         self.obstacles.clear()
