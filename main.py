@@ -27,6 +27,7 @@ The order of these arguments do not matter.
 from sys import argv
 from gameWindow import ChromeDinosaurGame
 
+
 # Execute the program if ran directly
 if __name__ == "__main__":
     # Check if the user has enabled or disabled the NEAT implementation

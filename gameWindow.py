@@ -247,16 +247,19 @@ class ChromeDinosaurGame(pyglet.window.Window):
                 anchor_y="top",
                 batch=self.neat_batch
             )
+
             # Run the NEAT algorithm and find the best "player"
             winner = population.run(self.eval_genomes, 25)
 
-            # Print the genome that performed the best
-            print(f"\nBest genome:\n{winner}")
+            # If the program is terminated at the last generation, don't show the results
+            if not self.has_exit:
+                # Print the genome that performed the best
+                print(f"\nBest genome:\n{winner}")
 
-            # Save the AI if it does very well (over 16,000 points in the game)
-            if winner.fitness > 1500:
-                with open("winner.pkl", "wb") as f:
-                    pickle.dump(winner, f)
+                # Save the AI if it does very well (over 16,000 points in the game)
+                if winner.fitness > 1500:
+                    with open("winner.pkl", "wb") as f:
+                        pickle.dump(winner, f)
         else:
             # Run the main loop and play the game manually
             pyglet.app.run()
