@@ -39,7 +39,6 @@ class Dinosaur(GameSprite):
     def duck(self):
         if not self.ducking and not self.jumping:
             self.ducking = True
-            self.change_image
     
 
     # Stop the dinosaur from ducking

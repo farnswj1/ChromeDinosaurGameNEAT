@@ -21,6 +21,7 @@ from random import random, randint, choice
 
 # Chrome dinosaur window class
 class ChromeDinosaurGame(pyglet.window.Window):
+    # Constructor
     def __init__(self, enable_neat=False, night_mode=False, *args, **kwargs):
         # Inherit the pyglet window
         super().__init__(*args, **kwargs)
@@ -28,6 +29,10 @@ class ChromeDinosaurGame(pyglet.window.Window):
         # Save the configuration that determines if the NEAT algorithm is used
         self.enable_neat = enable_neat
 
+        # Change the background color to white unless the user selects night mode
+        if not night_mode:
+            pyglet.gl.glClearColor(1, 1, 1, 1)
+        
         # Generate the font style
         pyglet.font.add_file('data/fonts/press_start_2p.ttf')
         pyglet.font.load("Press Start 2P")
@@ -163,7 +168,7 @@ class ChromeDinosaurGame(pyglet.window.Window):
         self.moon = GameSprite(next(self.moon_phases), 2920, 275, velx=-20, batch=self.bg_batch)
         self.clouds = [] # Elements will be randomly generated as the game progresses
         self.obstacles = [] # Elements will be randomly generated as the game progresses
-        self.stars = [] # Elements will be generated when the moon appears on the screen
+        self.stars = [] # Elements will be randomly generated as the game progresses
         
         # Reset button is only available when the user plays manually
         if not self.enable_neat:
@@ -194,10 +199,6 @@ class ChromeDinosaurGame(pyglet.window.Window):
 
         # Control the star opacity by increasing it at night 
         self.star_opacity = 0
-
-        # Change the background color to white unless the user selects night mode
-        if not night_mode:
-            pyglet.gl.glClearColor(1, 1, 1, 1)
 
         # Set up the NEAT algorithm if true. Otherwise, let the user play manually
         if self.enable_neat:
@@ -256,8 +257,23 @@ class ChromeDinosaurGame(pyglet.window.Window):
                 # Print the genome that performed the best
                 print(f"\nBest genome:\n{winner}")
 
-                # Save the AI if it does very well (over 16,000 points in the game)
-                if winner.fitness > 1500:
+                # If winner.pkl exists, save the best genome
+                if os.path.exists("winner.pkl"):
+                    # Get the current genome saved in the .pkl file
+                    with open("winner.pkl", "rb") as f:
+                        saved_genome = pickle.load(f)
+
+                    # Save the winner genome if it has a higher fitness than the saved genome
+                    if winner.fitness > saved_genome.fitness:
+                        print(
+                            "This genome performed better than the saved genome!\n"
+                            "Overwriting the saved genome with this session's best genome..."
+                        )
+                        with open("winner.pkl", "wb") as f:
+                            pickle.dump(winner, f)
+                else:
+                    # Create the .pkl file and save the winner genome
+                    print("Generating winner.pkl and saving the best genome...")
                     with open("winner.pkl", "wb") as f:
                         pickle.dump(winner, f)
         else:
