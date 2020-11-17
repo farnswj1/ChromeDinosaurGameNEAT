@@ -135,20 +135,6 @@ class ChromeDinosaurGame(pyglet.window.Window):
             anchor_y="top",
             batch=self.bg_batch
         )
-
-        # Game over label (only if the user plays the game manually)
-        if not self.enable_neat:
-            self.game_over_label = pyglet.text.Label(
-                "G A M E  O V E R",
-                font_name="Press Start 2P",
-                font_size=30,
-                color=(255, 255, 255, 255) if night_mode else (0, 0, 0, 255),
-                x=self.width / 2,
-                y=self.height / 2 + 100,
-                anchor_x="center",
-                anchor_y="center",
-                batch=self.game_over_batch
-            )
         
         # Initialize the sprites
         self.terrain_1 = GameSprite(
@@ -169,26 +155,6 @@ class ChromeDinosaurGame(pyglet.window.Window):
         self.clouds = [] # Elements will be randomly generated as the game progresses
         self.obstacles = [] # Elements will be randomly generated as the game progresses
         self.stars = [] # Elements will be randomly generated as the game progresses
-        
-        # Reset button is only available when the user plays manually
-        if not self.enable_neat:
-            self.reset_button = GameSprite(
-                self.reset_button_img,
-                564,
-                150,
-                batch=self.game_over_batch
-            )
-        
-        # Generate the user's dinosaur if the user plays manually
-        if not self.enable_neat:
-            self.dinosaur = Dinosaur(self.dinosaur_run_animation, 65, 45, batch=self.main_batch)
-
-            # Set variables to track user inputs
-            self.trigger_duck = False
-            self.trigger_jump = False
-
-            # Keep track of any user collisions
-            self.user_collision = False
 
         # Add a delays to control when events happen
         self.next_score_increment = 0.1
@@ -277,6 +243,37 @@ class ChromeDinosaurGame(pyglet.window.Window):
                     with open("winner.pkl", "wb") as f:
                         pickle.dump(winner, f)
         else:
+            # Generate the user's dinosaur if the user plays manually
+            self.dinosaur = Dinosaur(self.dinosaur_run_animation, 65, 45, batch=self.main_batch)
+
+            # Set variables to track user inputs
+            self.trigger_duck = False
+            self.trigger_jump = False
+
+            # Keep track of any user collisions
+            self.user_collision = False
+
+            # Game over label
+            self.game_over_label = pyglet.text.Label(
+                "G A M E  O V E R",
+                font_name="Press Start 2P",
+                font_size=30,
+                color=(255, 255, 255, 255) if night_mode else (0, 0, 0, 255),
+                x=self.width / 2,
+                y=self.height / 2 + 100,
+                anchor_x="center",
+                anchor_y="center",
+                batch=self.game_over_batch
+            )
+
+            # Reset button
+            self.reset_button = GameSprite(
+                self.reset_button_img,
+                564,
+                150,
+                batch=self.game_over_batch
+            )
+
             # Run the main loop and play the game manually
             pyglet.app.run()
 

@@ -38,9 +38,9 @@ if __name__ == "__main__":
 
     # Run the game
     ChromeDinosaurGame(
+        caption="Google Chrome Dinosaur Game (with NEAT)",
         width=1200,
         height=400,
-        caption="Google Chrome Dinosaur Game",
         enable_neat=use_neat,
         night_mode=night_mode
     )
