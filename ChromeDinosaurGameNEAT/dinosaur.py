@@ -7,9 +7,11 @@ This is a subclass of the game sprite in gameObject.py.
 '''
 
 # Imported modules
-from gameObject import GameSprite
+from .gameSprite import GameSprite
+from .constants import *
 
 
+# Subclass of the GameSprite class
 class Dinosaur(GameSprite):
     # Constructor
     def __init__(self, *args, **kwargs):
@@ -25,6 +27,7 @@ class Dinosaur(GameSprite):
     def jump(self):
         if not self.jumping and not self.ducking:
             self.vely = 1200
+            self.image = DINOSAUR_JUMP_IMG
             self.jumping = True
     
 
@@ -32,15 +35,32 @@ class Dinosaur(GameSprite):
     def land(self):
         self.y = 45
         self.vely = 0
+        self.image = DINOSAUR_RUN_ANIMATION
         self.jumping = False
     
 
     # Make the dinosaur duck (only if it isn't already ducking or jumping)
     def duck(self):
         if not self.ducking and not self.jumping:
+            self.image = DINOSAUR_DUCK_ANIMATION
             self.ducking = True
     
 
     # Stop the dinosaur from ducking
     def rise(self):
+        self.image = DINOSAUR_RUN_ANIMATION
+        self.ducking = False
+    
+
+    # Update the dinosaur if it collided with an object
+    def collided(self):
+        self.image = DINOSAUR_COLLISION_IMG
+
+    
+    # Reset the dinosaur
+    def reset(self, y):
+        self.y = y
+        self.vely = 0
+        self.image = DINOSAUR_RUN_ANIMATION
+        self.jumping = False
         self.ducking = False

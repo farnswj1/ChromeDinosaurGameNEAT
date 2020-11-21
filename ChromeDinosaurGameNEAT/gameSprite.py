@@ -21,11 +21,6 @@ class GameSprite(Sprite):
         self.velx = velx
         self.vely = vely
     
-
-    # Change the sprite image
-    def change_image(self, image):
-        self.image = image
-    
     
     # Update the sprite
     def update(self, dt):

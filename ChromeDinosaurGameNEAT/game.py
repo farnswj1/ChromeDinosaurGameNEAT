@@ -1,9 +1,9 @@
 '''
 Justin Farnsworth
 Google Chrome Dinosaur Game (with NEAT)
-November 12, 2020
+November 21, 2020
 
-This is a subclass of the window class in pyglet.
+This is the game script, which handles the game objects and logic.
 '''
 
 # Imported modules
@@ -11,44 +11,28 @@ import pyglet
 import neat
 import os
 import pickle
-from pyglet.window import key, mouse, FPSDisplay
-from pyglet.image import ImageGrid, Animation
-from gameObject import GameSprite
-from dinosaur import Dinosaur
-from itertools import cycle
+from .gameSprite import GameSprite
+from .dinosaur import Dinosaur
+from .constants import *
 from random import random, randint, choice
 
 
-# Chrome dinosaur window class
-class ChromeDinosaurGame(pyglet.window.Window):
+# Game class handles the game events
+class Game:
     # Constructor
-    def __init__(self, enable_neat=False, night_mode=False, *args, **kwargs):
-        # Inherit the pyglet window
-        super().__init__(*args, **kwargs)
-
+    def __init__(self, enable_neat=False, night_mode=False):
         # Save the configuration that determines if the NEAT algorithm is used
         self.enable_neat = enable_neat
 
+        # Save the configuration that determines if night mode is enabled
+        self.night_mode = night_mode
+
         # Change the background color to white unless the user selects night mode
-        if not night_mode:
+        if not self.night_mode:
             pyglet.gl.glClearColor(1, 1, 1, 1)
-        
-        # Generate the font style
-        pyglet.font.add_file('data/fonts/press_start_2p.ttf')
-        pyglet.font.load("Press Start 2P")
 
-        # Save and draw the FPS
-        self.frame_rate = 1/60
-        self.fps_display = FPSDisplay(self)
-        self.fps_display.label.x = self.width - 10
-        self.fps_display.label.y = 10
-        self.fps_display.label.anchor_x = "right"
-        self.fps_display.label.font_name = "Press Start 2P"
-        self.fps_display.label.font_size = 20
-        self.fps_display.label.color = (192, 192, 192, 192)
-
-        # Set the FPS
-        pyglet.clock.schedule_interval(self.update, self.frame_rate)
+        # Keep track of when the program is terminated
+        self.user_exit = False
 
         # Control the horizontal velocity of the obstacles
         self.obstacle_velx = -600
@@ -60,77 +44,16 @@ class ChromeDinosaurGame(pyglet.window.Window):
             self.neat_batch = pyglet.graphics.Batch()
         else:
             self.game_over_batch = pyglet.graphics.Batch()
-
-        # Preload the images into memory and save them
-        game_sprites = self.preload_image("sprites.png")
-        self.terrain_img = game_sprites.get_region(2, 0, 2402, 27)
-        self.dinosaur_run_animation = Animation.from_image_sequence(
-            ImageGrid(
-                game_sprites.get_region(1854, 33, 176, 95),
-                1,
-                2,
-                item_width=88,
-                item_height=96
-            ),
-            0.3,
-            loop=True
-        )
-        self.dinosaur_duck_animation = Animation.from_image_sequence(
-            ImageGrid(
-                game_sprites.get_region(2203, 33, 240, 61),
-                1,
-                2,
-                item_width=118,
-                item_height=62
-            ),
-            0.3,
-            loop=True
-        )
-        self.dinosaur_jump_img = game_sprites.get_region(1678, 33, 88, 95)
-        self.dinosaur_collision_img = game_sprites.get_region(2030, 33, 88, 95)
-        self.cacti_imgs = (
-            game_sprites.get_region(446, 58, 34, 70),  # Small cacti 1
-            game_sprites.get_region(480, 58, 68, 70),  # Small cacti 2
-            game_sprites.get_region(548, 58, 102, 70), # Small cacti 3
-            game_sprites.get_region(652, 32, 50, 98),  # Large cacti 1
-            game_sprites.get_region(702, 32, 100, 98), # Large cacti 2
-            game_sprites.get_region(802, 30, 150, 98), # Large cacti 3
-
-        )
-        self.bird_animation = Animation.from_image_sequence(
-            ImageGrid(
-                game_sprites.get_region(260, 48, 184, 80),
-                1, 2, item_width=92, item_height=80
-            ),
-            0.3,
-            loop=True
-        )
-        self.cloud_img = game_sprites.get_region(165, 100, 95, 28)
-        self.moon_phases = cycle((
-            game_sprites.get_region(1234, 47, 40, 82),
-            game_sprites.get_region(1194, 47, 40, 82),
-            game_sprites.get_region(1154, 47, 40, 82),
-            game_sprites.get_region(1074, 47, 80, 82),
-            game_sprites.get_region(1034, 47, 40, 82),
-            game_sprites.get_region(994, 47, 40, 82),
-            game_sprites.get_region(954, 47, 40, 82)
-        ))
-        self.star_imgs = (
-            game_sprites.get_region(1274, 74, 18, 18),
-            game_sprites.get_region(1274, 92, 18, 18),
-            game_sprites.get_region(1274, 110, 18, 18)
-        )
-        self.reset_button_img = game_sprites.get_region(2, 63, 72, 65)
-
+        
         # Score and label
         self.score = 0
         self.score_label = pyglet.text.Label(
             f"{self.score:05}",
             font_name="Press Start 2P",
             font_size=20,
-            color=(255, 255, 255, 255) if night_mode else (0, 0, 0, 255),
-            x=self.width - 10,
-            y=self.height - 10,
+            color=(255, 255, 255, 255) if self.night_mode else (0, 0, 0, 255),
+            x=WINDOW_WIDTH - 10,
+            y=WINDOW_HEIGHT - 10,
             anchor_x="right",
             anchor_y="top",
             batch=self.bg_batch
@@ -138,20 +61,20 @@ class ChromeDinosaurGame(pyglet.window.Window):
         
         # Initialize the sprites
         self.terrain_1 = GameSprite(
-            self.terrain_img,
+            TERRAIN_IMG,
             0,
             50,
             velx=self.obstacle_velx,
             batch=self.bg_batch
         )
         self.terrain_2 = GameSprite(
-            self.terrain_img,
+            TERRAIN_IMG,
             2400,
             50,
             velx=self.obstacle_velx,
             batch=self.bg_batch
         )
-        self.moon = GameSprite(next(self.moon_phases), 2920, 275, velx=-20, batch=self.bg_batch)
+        self.moon = GameSprite(next(MOON_PHASES), 2920, 275, velx=-20, batch=self.bg_batch)
         self.clouds = [] # Elements will be randomly generated as the game progresses
         self.obstacles = [] # Elements will be randomly generated as the game progresses
         self.stars = [] # Elements will be randomly generated as the game progresses
@@ -166,85 +89,10 @@ class ChromeDinosaurGame(pyglet.window.Window):
         # Control the star opacity by increasing it at night 
         self.star_opacity = 0
 
-        # Set up the NEAT algorithm if true. Otherwise, let the user play manually
-        if self.enable_neat:
-            # Locate the NEAT configuration file
-            config_file = os.path.join(os.path.dirname(__file__), "neat_config.txt")
-
-            # Configure the NEAT algorithm
-            config = neat.config.Config(
-                neat.DefaultGenome,
-                neat.DefaultReproduction,
-                neat.DefaultSpeciesSet,
-                neat.DefaultStagnation,
-                config_file
-            )
-
-            # Generate the population
-            population = neat.Population(config)
-
-            # Add a reporter to show progress in the terminal
-            population.add_reporter(neat.StdOutReporter(True))
-            population.add_reporter(neat.StatisticsReporter())
-
-            # Generation label
-            self.generation = -1
-            self.generation_label = pyglet.text.Label(
-                f"GENERATION: {self.generation:02}",
-                font_name="Press Start 2P",
-                font_size=20,
-                color=(255, 255, 255, 255) if night_mode else (0, 0, 0, 255),
-                x=10,
-                y=self.height - 10,
-                anchor_x="left",
-                anchor_y="top",
-                batch=self.neat_batch
-            )
-
-            # Number of dinosaurs label
-            self.number_of_dinosaurs = 0
-            self.number_of_dinosaurs_label = pyglet.text.Label(
-                f"DINOSAURS: {self.number_of_dinosaurs:03}",
-                font_name="Press Start 2P",
-                font_size=20,
-                color=(255, 255, 255, 255) if night_mode else (0, 0, 0, 255),
-                x=10,
-                y=self.height - 40,
-                anchor_x="left",
-                anchor_y="top",
-                batch=self.neat_batch
-            )
-
-            # Run the NEAT algorithm and find the best "player"
-            winner = population.run(self.eval_genomes, 25)
-
-            # If the program is terminated at the last generation, don't show the results
-            if not self.has_exit:
-                # Print the genome that performed the best
-                print(f"\nBest genome:\n{winner}")
-
-                # If winner.pkl exists, save the best genome
-                if os.path.exists("winner.pkl"):
-                    # Get the current genome saved in the .pkl file
-                    with open("winner.pkl", "rb") as f:
-                        saved_genome = pickle.load(f)
-
-                    # Save the winner genome if it has a higher fitness than the saved genome
-                    if winner.fitness > saved_genome.fitness:
-                        print(
-                            "This genome performed better than the saved genome!\n"
-                            "Overwriting the saved genome with this session's best genome..."
-                        )
-                        with open("winner.pkl", "wb") as f:
-                            pickle.dump(winner, f)
-                else:
-                    # Create the .pkl file and save the winner genome
-                    print("Generating winner.pkl and saving the best genome...")
-                    with open("winner.pkl", "wb") as f:
-                        pickle.dump(winner, f)
-        else:
+        # Initalize the player's dinosaur if NEAT is disabled
+        if not self.enable_neat:
             # Generate the user's dinosaur if the user plays manually
-            self.dinosaur = Dinosaur(self.dinosaur_run_animation, 65, 45, batch=self.main_batch)
+            self.dinosaur = Dinosaur(DINOSAUR_RUN_ANIMATION, 65, 45, batch=self.main_batch)
 
             # Set variables to track user inputs
             self.trigger_duck = False
@@ -258,9 +106,9 @@ class ChromeDinosaurGame(pyglet.window.Window):
                 "G A M E  O V E R",
                 font_name="Press Start 2P",
                 font_size=30,
-                color=(255, 255, 255, 255) if night_mode else (0, 0, 0, 255),
-                x=self.width / 2,
-                y=self.height / 2 + 100,
+                color=(255, 255, 255, 255) if self.night_mode else (0, 0, 0, 255),
+                x=WINDOW_WIDTH / 2,
+                y=WINDOW_HEIGHT / 2 + 100,
                 anchor_x="center",
                 anchor_y="center",
                 batch=self.game_over_batch
@@ -268,71 +116,105 @@ class ChromeDinosaurGame(pyglet.window.Window):
 
             # Reset button
             self.reset_button = GameSprite(
-                self.reset_button_img,
+                RESET_BUTTON_IMG,
                 564,
                 150,
                 batch=self.game_over_batch
             )
-
-            # Run the main loop and play the game manually
-            pyglet.app.run()
-
-
-    # Load and save the image into memory
-    def preload_image(self, image):
-        return pyglet.image.load(f"data/images/{image}")
     
 
-    # Handle the events when a key is pressed
-    def on_key_press(self, symbol, modifiers):
-        # Terminate the game if the ESC is pressed
-        if symbol == key.ESCAPE:
-            self.has_exit = True
-            pyglet.app.exit()
-        
-        # Disable if the NEAT algorithm is being used
-        if not self.enable_neat:
-            # Check if the user triggers a duck or jump (duck is a priority over jump)
-            if symbol in (key.DOWN, key.S):
-                self.trigger_duck = True
-            elif symbol in (key.SPACE, key.UP, key.W):
-                self.trigger_jump = True
+    # Setup and run the game with the NEAT algorithm
+    def run_neat(self):
+        # Locate the NEAT configuration file
+        config_file = os.path.join(os.path.dirname(__file__), "neat_config.txt")
 
-            # Accept the ENTER key only if the game is over
-            if self.user_collision and symbol == key.ENTER:
-                self.reset()
+        # Configure the NEAT algorithm
+        config = neat.config.Config(
+            neat.DefaultGenome,
+            neat.DefaultReproduction,
+            neat.DefaultSpeciesSet,
+            neat.DefaultStagnation,
+            config_file
+        )
 
+        # Generate the population
+        population = neat.Population(config)
+
+        # Add a reporter to show progress in the terminal
+        population.add_reporter(neat.StdOutReporter(True))
+        population.add_reporter(neat.StatisticsReporter())
+
+        # Generation label
+        self.generation = -1
+        self.generation_label = pyglet.text.Label(
+            f"GENERATION: {self.generation:02}",
+            font_name="Press Start 2P",
+            font_size=20,
+            color=(255, 255, 255, 255) if self.night_mode else (0, 0, 0, 255),
+            x=10,
+            y=WINDOW_HEIGHT - 10,
+            anchor_x="left",
+            anchor_y="top",
+            batch=self.neat_batch
+        )
+
+        # Number of dinosaurs label
+        self.number_of_dinosaurs = 0
+        self.number_of_dinosaurs_label = pyglet.text.Label(
+            f"DINOSAURS: {self.number_of_dinosaurs:03}",
+            font_name="Press Start 2P",
+            font_size=20,
+            color=(255, 255, 255, 255) if self.night_mode else (0, 0, 0, 255),
+            x=10,
+            y=WINDOW_HEIGHT - 40,
+            anchor_x="left",
+            anchor_y="top",
+            batch=self.neat_batch
+        )
+
+        # Run the NEAT algorithm and find the best "player"
+        winner = population.run(self.eval_genomes, GENERATIONS)
+
+        # If the program is terminated at the last generation, don't show the results
+        if not self.user_exit:
+            # Print the genome that performed the best
+            print(f"\nBest genome:\n{winner}")
+
+            # If winner.pkl exists, save the best genome
+            if os.path.exists("winner.pkl"):
+                # Get the current genome saved in the .pkl file
+                with open("winner.pkl", "rb") as f:
+                    saved_genome = pickle.load(f)
+                
+                # Save the winner genome if it has a higher fitness than the saved genome
+                if winner.fitness > saved_genome.fitness:
+                    print(
+                        "This genome performed better than the saved genome!\n"
+                        "Overwriting the saved genome with this session's best genome..."
+                    )
+                    with open("winner.pkl", "wb") as f:
+                        pickle.dump(winner, f)
+            else:
+                # Create the .pkl file and save the winner genome
+                print("Generating winner.pkl and saving the best genome...")
+                with open("winner.pkl", "wb") as f:
+                    pickle.dump(winner, f)
     
-    # Handle the events when a key is pressed
-    def on_key_release(self, symbol, modifiers):
-        # Disable if the NEAT algorithm is being used
-        if not self.enable_neat:
-            # Check if the user released a key that triggers a duck
-            if symbol in (key.DOWN, key.S):
-                self.trigger_duck = False
-            
-            # Check if the user released a key that triggers a jump
-            if symbol in (key.SPACE, key.UP, key.W):
-                self.trigger_jump = False
 
-    
     # Handle the events when the mouse is pressed
-    def on_mouse_press(self, x, y, button, modifiers):
+    def on_mouse_press(self, x, y):
         # Disable if the NEAT algorithm is being used
         if not self.enable_neat:
             if (self.user_collision 
-            and button == mouse.LEFT
             and self.reset_button.x <= x <= self.reset_button.x + self.reset_button.width 
             and self.reset_button.y <= y <= self.reset_button.y + self.reset_button.height):
                 self.reset()
+    
 
-
-    # Draw the contents on the screen
-    def on_draw(self):
-        self.clear()
+    # Draw the contents of the game onto the window
+    def draw(self):
         self.bg_batch.draw() # Draw the background first
         self.main_batch.draw() # Draw the dinosaur and the obstacles next
-        self.fps_display.draw()
 
         # Draw the NEAT batch if used. Otherwise, draw the game over batch if a collision occurs
         if self.enable_neat:
@@ -355,7 +237,7 @@ class ChromeDinosaurGame(pyglet.window.Window):
         
         # The only other outcome is that they overlap
         return True
-
+    
 
     # Update the dinosaur
     def update_dinosaur(self, dinosaur, dt, output=None):
@@ -364,7 +246,6 @@ class ChromeDinosaurGame(pyglet.window.Window):
             # Dinosaur is in the air. Check if it has landed
             if dinosaur.y <= 45 and dinosaur.vely <= 0:
                 # Dinosaur hits the ground after jumping
-                dinosaur.change_image(self.dinosaur_run_animation)
                 dinosaur.land()
             else:
                 # Decrement the dinosaur's vertical velocity
@@ -377,29 +258,23 @@ class ChromeDinosaurGame(pyglet.window.Window):
                 # Determine if the dinosaur should duck or jump
                 if output[0] > 0.5 and not dinosaur.jumping and not dinosaur.ducking:
                     # Start ducking animation
-                    dinosaur.change_image(self.dinosaur_duck_animation)
                     dinosaur.duck()
                 if output[0] <= 0.5 and not dinosaur.jumping and dinosaur.ducking:
                     # End duck animation
-                    dinosaur.change_image(self.dinosaur_run_animation)
                     dinosaur.rise()
                 elif output[1] > 0.5 and not dinosaur.jumping and not dinosaur.ducking:
                     # Start jumping animation
-                    dinosaur.change_image(self.dinosaur_jump_img)
                     dinosaur.jump()
         else:
             # Make the dinosaur duck or jump, depending on the key pressed
             if self.trigger_duck and not dinosaur.jumping and not dinosaur.ducking:
                 # Start duck animation
-                dinosaur.change_image(self.dinosaur_duck_animation)
                 dinosaur.duck()
             elif not self.trigger_duck and not dinosaur.jumping and dinosaur.ducking:
                 # End duck animation
-                dinosaur.change_image(self.dinosaur_run_animation)
                 dinosaur.rise()
             elif self.trigger_jump and not self.trigger_duck:
                 # Start jump animation
-                dinosaur.change_image(self.dinosaur_jump_img)
                 dinosaur.jump()
 
         # Update the dinosaur's position
@@ -434,7 +309,7 @@ class ChromeDinosaurGame(pyglet.window.Window):
                 # Check if the user collided with any obstacles
                 if self.collide(self.dinosaur, obstacle):
                     self.user_collision = True
-                    self.dinosaur.change_image(self.dinosaur_collision_img)
+                    self.dinosaur.collided()
                     
                     # Prevent any further updates if a collision has been detected
                     return
@@ -458,7 +333,7 @@ class ChromeDinosaurGame(pyglet.window.Window):
         # Update the moon and move the moon if needed
         if self.moon.x + 80 < 0:
             self.moon.x += 3000
-            self.moon.change_image(next(self.moon_phases))
+            self.moon.image = next(MOON_PHASES)
         self.moon.update(dt)
 
         # Update the star opacity variable before updating the stars
@@ -516,7 +391,7 @@ class ChromeDinosaurGame(pyglet.window.Window):
         self.next_cloud_spawn -= dt
         if self.next_cloud_spawn <= 0:
             self.clouds.append(
-                GameSprite(self.cloud_img, 1200, randint(225, 325), velx=-150, batch=self.bg_batch)
+                GameSprite(CLOUD_IMG, 1200, randint(225, 325), velx=-150, batch=self.bg_batch)
             )
             ''' 
             The 2 ensures that the cloud spawns at least 2 seconds later
@@ -534,7 +409,7 @@ class ChromeDinosaurGame(pyglet.window.Window):
             if object_type == 6: # Spawn bird
                 self.obstacles.append(
                     GameSprite(
-                        self.bird_animation,
+                        BIRD_ANIMATION,
                         1200,
                         choice((50, 125, 200)),
                         velx=self.obstacle_velx - 100,
@@ -544,7 +419,7 @@ class ChromeDinosaurGame(pyglet.window.Window):
             else: # Spawn cacti
                 self.obstacles.append(
                     GameSprite(
-                        choice(self.cacti_imgs),
+                        choice(CACTI_IMGS),
                         1200,
                         45,
                         velx=self.obstacle_velx,
@@ -557,7 +432,7 @@ class ChromeDinosaurGame(pyglet.window.Window):
         self.next_star_spawn -= dt
         if self.next_star_spawn <= 0:
             self.stars.append(
-                GameSprite(choice(self.star_imgs),
+                GameSprite(choice(STAR_IMGS),
                 1200,
                 randint(200, 350),
                 velx=-10,
@@ -587,41 +462,10 @@ class ChromeDinosaurGame(pyglet.window.Window):
             self.number_of_dinosaurs_label.text = f"DINOSAURS: {self.number_of_dinosaurs:03}"
     
 
-    # Reset the game
-    def reset(self):
-        # Delete the image from video memory
-        for obstacle in self.obstacles:
-            obstacle.delete()
-        
-        # Clear the list of obstacles
-        self.obstacles.clear()
-
-        # Reset the dinosaur(s)
-        if self.enable_neat:
-            for dinosaur in self.dinosaurs:
-                dinosaur.change_image(self.dinosaur_run_animation)
-        else:
-            self.dinosaur.change_image(self.dinosaur_run_animation)
-            self.dinosaur.y = 45
-            self.jumping = False
-            self.ducking = False
-
-        # Reset the score
-        self.score = 0
-
-        # Reset the velocities (obstacles are deleted, so we don't need to worry about them)
-        self.obstacle_velx = -600
-        self.terrain_1.velx = self.obstacle_velx
-        self.terrain_2.velx = self.obstacle_velx
-
-        # Reset the collision boolean so the game can start
-        self.user_collision = False
-
-    
     # Run the game with the NEAT algorithm
     def eval_genomes(self, genomes, config):
         # Terminate if the user closed the window
-        if self.has_exit:
+        if self.user_exit:
             exit()
 
         # Increment the generation number
@@ -637,8 +481,33 @@ class ChromeDinosaurGame(pyglet.window.Window):
         for _, genome in genomes:
             genome.fitness = 0  # Start with fitness level of 0
             self.neural_nets.append(neat.nn.FeedForwardNetwork.create(genome, config))
-            self.dinosaurs.append(Dinosaur(self.dinosaur_run_animation, 65, 45, batch=self.main_batch))
+            self.dinosaurs.append(Dinosaur(DINOSAUR_RUN_ANIMATION, 65, 45, batch=self.main_batch))
             self.genomes.append(genome)
         
         # Run the game
         pyglet.app.run()
+    
+    
+    # Reset the game
+    def reset(self):
+        # Delete the image from video memory
+        for obstacle in self.obstacles:
+            obstacle.delete()
+        
+        # Clear the list of obstacles
+        self.obstacles.clear()
+
+        # Reset the dinosaur(s)
+        if not self.enable_neat:
+            self.dinosaur.reset(45)
+
+            # Reset the collision boolean so the game can start for the player
+            self.user_collision = False
+
+        # Reset the score
+        self.score = 0
+
+        # Reset the velocities (obstacles are deleted, so we don't need to worry about them)
+        self.obstacle_velx = -600
+        self.terrain_1.velx = self.obstacle_velx
+        self.terrain_2.velx = self.obstacle_velx

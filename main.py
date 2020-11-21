@@ -25,7 +25,8 @@ The order of these arguments do not matter.
 
 # Imported modules
 from sys import argv
-from gameWindow import ChromeDinosaurGame
+from ChromeDinosaurGameNEAT.gameWindow import ChromeDinosaurGame
+from ChromeDinosaurGameNEAT.constants import WINDOW_WIDTH, WINDOW_HEIGHT
 
 
 # Execute the program if ran directly
@@ -37,10 +38,4 @@ if __name__ == "__main__":
     night_mode = ("night" in argv)
 
     # Run the game
-    ChromeDinosaurGame(
-        caption="Google Chrome Dinosaur Game (with NEAT)",
-        width=1200,
-        height=400,
-        enable_neat=use_neat,
-        night_mode=night_mode
-    )
+    ChromeDinosaurGame(enable_neat=use_neat, night_mode=night_mode)
