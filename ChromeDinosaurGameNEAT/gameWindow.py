@@ -10,7 +10,7 @@ This is a subclass of the window class in pyglet.
 import pyglet
 from pyglet.window import key, mouse, FPSDisplay
 from .gameEventHandler import GameEventHandler
-from .constants import WINDOW_WIDTH, WINDOW_HEIGHT, GENERATIONS
+from .constants import WINDOW_WIDTH, WINDOW_HEIGHT, FONT_NAME, GENERATIONS
 
 
 # Chrome dinosaur window class
@@ -30,7 +30,7 @@ class ChromeDinosaurGame(pyglet.window.Window):
         self.enable_neat = enable_neat
         
         # Generate the font style
-        pyglet.font.add_file('data/fonts/press_start_2p.ttf')
+        pyglet.font.add_file(FONT_NAME)
         pyglet.font.load("Press Start 2P")
 
         # Save and draw the FPS
