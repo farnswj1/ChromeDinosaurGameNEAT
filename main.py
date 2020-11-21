@@ -8,7 +8,7 @@ Google Chrome. The user can choose to play the game manually or the user
 can allow the NEAT algorithm to play the game. If the NEAT algorithm is 
 used, the AI will try to survive as long as possible. This project was 
 inspired by Code Bullet, who conceived the idea and made an implementation 
-in JavaScript.
+in Processing.
 
 To play the game manually, type in the following command:
     python main.py
