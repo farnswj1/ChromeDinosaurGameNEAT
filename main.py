@@ -24,18 +24,17 @@ The order of these arguments do not matter.
 '''
 
 # Imported modules
+import ChromeDinosaurGameNEAT
 from sys import argv
-from ChromeDinosaurGameNEAT.gameWindow import ChromeDinosaurGame
-from ChromeDinosaurGameNEAT.constants import WINDOW_WIDTH, WINDOW_HEIGHT
 
 
 # Execute the program if ran directly
 if __name__ == "__main__":
     # Check if the user has enabled or disabled the NEAT implementation
-    use_neat = ("neat" in argv)
+    enable_neat = ("neat" in argv)
 
     # Check if the user has enabled night mode
     night_mode = ("night" in argv)
 
     # Run the game
-    ChromeDinosaurGame(enable_neat=use_neat, night_mode=night_mode)
+    ChromeDinosaurGameNEAT.run(enable_neat=enable_neat, night_mode=night_mode)

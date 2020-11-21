@@ -9,7 +9,7 @@ This is a subclass of the window class in pyglet.
 # Imported modules
 import pyglet
 from pyglet.window import key, mouse, FPSDisplay
-from .game import Game
+from .gameEventHandler import GameEventHandler
 from .constants import WINDOW_WIDTH, WINDOW_HEIGHT, GENERATIONS
 
 
@@ -47,7 +47,7 @@ class ChromeDinosaurGame(pyglet.window.Window):
         pyglet.clock.schedule_interval(self.update, self.frame_rate)
 
         # Create the game instance
-        self.game = Game(enable_neat=enable_neat, night_mode=night_mode)
+        self.game = GameEventHandler(enable_neat=enable_neat, night_mode=night_mode)
 
         # If NEAT is enabled, run the game using NEAT. Otherwise, let the player play manually
         if enable_neat:
@@ -58,11 +58,9 @@ class ChromeDinosaurGame(pyglet.window.Window):
 
     # Handle the events when a key is pressed
     def on_key_press(self, symbol, modifiers):
-        # Terminate the game if the ESC is pressed
+        # Terminate the game if the ESC key is pressed
         if symbol == key.ESCAPE:
-            self.has_exit = True
-            self.game.user_exit = True
-            pyglet.app.exit()
+            self.on_close()
         
         # Disable if the NEAT algorithm is being used
         if not self.enable_neat:
@@ -107,3 +105,9 @@ class ChromeDinosaurGame(pyglet.window.Window):
     # Update the objects
     def update(self, dt):
         self.game.update(dt)
+    
+
+    # Terminate the game if the window is closed
+    def on_close(self):
+        self.game.user_exit = True
+        super().on_close()

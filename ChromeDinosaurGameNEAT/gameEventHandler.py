@@ -18,7 +18,7 @@ from random import random, randint, choice
 
 
 # Game class handles the game events
-class Game:
+class GameEventHandler:
     # Constructor
     def __init__(self, enable_neat=False, night_mode=False):
         # Save the configuration that determines if the NEAT algorithm is used
@@ -283,28 +283,19 @@ class Game:
 
     # Update the objects
     def update(self, dt):
-        # Handle the collisions
+        # Handle the collisions and keep track of which dinosaurs collided with an obstacle
+        dinosaurs_to_remove = []
+        neural_nets_to_remove = []
+        genomes_to_remove = []
         for obstacle in self.obstacles:
             if self.enable_neat:
                 # Check each dinosaur for collisions
                 for dinosaur, neural_net, genome in zip(self.dinosaurs, self.neural_nets, self.genomes):
                     if self.collide(dinosaur, obstacle):
-                        # Delete the image from video memory
-                        dinosaur.delete()
-
-                        # Penalize the genome for the collision
-                        genome.fitness -= 100
-                        
-                        # Eliminate the dinosaur genome
-                        self.dinosaurs.remove(dinosaur)
-                        self.neural_nets.remove(neural_net)
-                        self.genomes.remove(genome)
-                        
-                        # Decrement the number of dinosaurs left and check if any remain
-                        self.number_of_dinosaurs -= 1
-                        if not self.dinosaurs:
-                            self.reset()
-                            pyglet.app.exit()
+                        # Add the dinosaur genome to the list of objects to remove
+                        dinosaurs_to_remove.append(dinosaur)
+                        neural_nets_to_remove.append(neural_net)
+                        genomes_to_remove.append(genome)
             else:
                 # Check if the user collided with any obstacles
                 if self.collide(self.dinosaur, obstacle):
@@ -314,45 +305,28 @@ class Game:
                     # Prevent any further updates if a collision has been detected
                     return
         
-        # Update the terrain sprites and check if any of them need to be moved
-        if self.terrain_1.x + self.terrain_1.width < 0: # Off the screen
-            self.terrain_1.x = self.terrain_2.x + self.terrain_2.width
-        elif self.terrain_2.x + self.terrain_2.width < 0: # Off the screen
-            self.terrain_2.x = self.terrain_1.x + self.terrain_1.width
-        self.terrain_1.update(dt)
-        self.terrain_2.update(dt)
-
-        # Update the clouds and delete those that run off the left side of the screen
-        for cloud in self.clouds:
-            if cloud.x + cloud.width < 0:
-                cloud.delete() # Delete the image from video memory
-                self.clouds.remove(cloud)
-            else:
-                cloud.update(dt)
-
-        # Update the moon and move the moon if needed
-        if self.moon.x + 80 < 0:
-            self.moon.x += 3000
-            self.moon.image = next(MOON_PHASES)
-        self.moon.update(dt)
-
-        # Update the star opacity variable before updating the stars
-        if self.moon.x < 1280:
-            self.star_opacity = min(self.star_opacity + (64 * dt), 255)
-        else:
-            self.star_opacity = max(self.star_opacity - (64 * dt), 0)
-
-        # Update the stars and delete those that run off the left side of the screen
-        for star in self.stars:
-            if star.x + star.width < 0:
-                star.delete() # Delete the image from video memory
-                self.stars.remove(star)
-            else:
-                star.update(dt)
-                star.opacity = round(self.star_opacity) # Opacity value must be an integer
-
-        # Update the dinosaur(s)
+        # Update the dinosaur(s) and, if NEAT is enabled, delete those that collided with an obstacle
         if self.enable_neat:
+            # Delete the dinosaurs that collided with an obstacle
+            for dinosaur, neural_net, genome in zip(dinosaurs_to_remove, neural_nets_to_remove, genomes_to_remove):
+                # Delete the image from video memory
+                dinosaur.delete()
+
+                # Penalize the genome for the collision
+                genome.fitness -= 100
+
+                # Add the dinosaur genome to the list of objects to remove
+                self.dinosaurs.remove(dinosaur)
+                self.neural_nets.remove(neural_net)
+                self.genomes.remove(genome)
+
+                # Decrement the number of dinosaurs left and check if any remain
+                self.number_of_dinosaurs -= 1
+                if not self.dinosaurs:
+                    self.reset()
+                    pyglet.app.exit()
+            
+            # Update the dinosaur genomes
             for dinosaur, neural_net, genome in zip(self.dinosaurs, self.neural_nets, self.genomes):
                 # Reward the genome with points for surviving
                 genome.fitness += dt
@@ -370,16 +344,69 @@ class Game:
                 # Update the dinosaur and have the neural network determine its next move
                 self.update_dinosaur(dinosaur, dt, output=output)
         else:
+            # Update the player's dinosaur
             self.update_dinosaur(self.dinosaur, dt)
-
-        # Update the obstacles and delete those that run off the left side of the screen
+        
+        # Update the obstacles and keep track of those that run off the left side of the screen
+        obstacles_to_remove = []
         for obstacle in self.obstacles:
             if obstacle.x + obstacle.width < 0:
-                obstacle.delete() # Delete the image from video memory
-                self.obstacles.remove(obstacle)
+                obstacles_to_remove.append(obstacle)
             else:
                 obstacle.update(dt)
+        
+        # Delete the obstacles that ran off the screen
+        for obstacle in obstacles_to_remove:
+            obstacle.delete() # Delete the image from video memory
+            self.obstacles.remove(obstacle)
+        
+        # Update the terrain sprites and check if any of them need to be moved
+        if self.terrain_1.x + self.terrain_1.width < 0: # Off the screen
+            self.terrain_1.x = self.terrain_2.x + self.terrain_2.width
+        elif self.terrain_2.x + self.terrain_2.width < 0: # Off the screen
+            self.terrain_2.x = self.terrain_1.x + self.terrain_1.width
+        self.terrain_1.update(dt)
+        self.terrain_2.update(dt)
 
+        # Update the clouds and keep track of those that run off the left side of the screen
+        clouds_to_remove = []
+        for cloud in self.clouds:
+            if cloud.x + cloud.width < 0:
+                clouds_to_remove.append(cloud)
+            else:
+                cloud.update(dt)
+
+        # Delete the clouds that ran off the screen
+        for cloud in clouds_to_remove:
+            cloud.delete() # Delete the image from video memory
+            self.clouds.remove(cloud)
+
+        # Update the moon and move the moon if needed
+        if self.moon.x + 80 < 0:
+            self.moon.x += 3000
+            self.moon.image = next(MOON_PHASES)
+        self.moon.update(dt)
+
+        # Update the star opacity variable before updating the stars
+        if self.moon.x < 1280:
+            self.star_opacity = min(self.star_opacity + (64 * dt), 255)
+        else:
+            self.star_opacity = max(self.star_opacity - (64 * dt), 0)
+
+        # Update the stars and keep track of those that run off the left side of the screen
+        stars_to_remove = []
+        for star in self.stars:
+            if star.x + star.width < 0:
+                stars_to_remove.append(star)
+            else:
+                star.update(dt)
+                star.opacity = round(self.star_opacity) # Opacity value must be an integer
+        
+        # Delete the stars that ran off the screen
+        for star in stars_to_remove:
+            star.delete() # Delete the image from video memory
+            self.stars.remove(star)
+                
         # Increment the score if scheduled to do so
         self.next_score_increment -= dt
         if self.next_score_increment <= 0:
@@ -446,10 +473,11 @@ class Game:
             # Increment to change the velocity by
             increment = -5
 
-            # Increase the velocity of the terrain and the obstacles
+            # Increase the velocity of the terrain
             self.terrain_1.velx += increment
             self.terrain_2.velx += increment
 
+            # Increase the velocity of the obstacles
             for obstacle in self.obstacles:
                 obstacle.velx += increment
             
