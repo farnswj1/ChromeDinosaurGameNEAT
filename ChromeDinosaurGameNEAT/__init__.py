@@ -8,7 +8,6 @@ This script runs the game contained in this package.
 
 # Imported modules
 from .gameWindow import ChromeDinosaurGame
-from .constants import WINDOW_WIDTH, WINDOW_HEIGHT
 
 
 # Run the game

@@ -8,7 +8,12 @@ This is a subclass of the game sprite in gameObject.py.
 
 # Imported modules
 from .gameSprite import GameSprite
-from .constants import *
+from .constants import (
+    DINOSAUR_RUN_ANIMATION,
+    DINOSAUR_JUMP_IMG,
+    DINOSAUR_DUCK_ANIMATION,
+    DINOSAUR_COLLISION_IMG
+)
 
 
 # Subclass of the GameSprite class
