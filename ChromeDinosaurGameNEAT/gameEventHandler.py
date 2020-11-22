@@ -259,7 +259,7 @@ class GameEventHandler:
                 if output[0] > 0.5 and not dinosaur.jumping and not dinosaur.ducking:
                     # Start ducking animation
                     dinosaur.duck()
-                if output[0] <= 0.5 and not dinosaur.jumping and dinosaur.ducking:
+                elif output[0] <= 0.5 and not dinosaur.jumping and dinosaur.ducking:
                     # End duck animation
                     dinosaur.rise()
                 elif output[1] > 0.5 and not dinosaur.jumping and not dinosaur.ducking:
@@ -273,7 +273,7 @@ class GameEventHandler:
             elif not self.trigger_duck and not dinosaur.jumping and dinosaur.ducking:
                 # End duck animation
                 dinosaur.rise()
-            elif self.trigger_jump and not self.trigger_duck:
+            elif self.trigger_jump and not dinosaur.jumping and not dinosaur.ducking:
                 # Start jump animation
                 dinosaur.jump()
 

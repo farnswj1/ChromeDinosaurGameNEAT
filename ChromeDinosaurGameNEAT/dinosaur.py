@@ -28,12 +28,11 @@ class Dinosaur(GameSprite):
         self.ducking = False
 
     
-    # Make the dinosaur jump (only if it isn't already jumping or ducking)
+    # Make the dinosaur jump
     def jump(self):
-        if not self.jumping and not self.ducking:
-            self.vely = 1200
-            self.image = DINOSAUR_JUMP_IMG
-            self.jumping = True
+        self.vely = 1200
+        self.image = DINOSAUR_JUMP_IMG
+        self.jumping = True
     
 
     # Stop the dinosaur from falling
@@ -44,11 +43,10 @@ class Dinosaur(GameSprite):
         self.jumping = False
     
 
-    # Make the dinosaur duck (only if it isn't already ducking or jumping)
+    # Make the dinosaur duck
     def duck(self):
-        if not self.ducking and not self.jumping:
-            self.image = DINOSAUR_DUCK_ANIMATION
-            self.ducking = True
+        self.image = DINOSAUR_DUCK_ANIMATION
+        self.ducking = True
     
 
     # Stop the dinosaur from ducking
