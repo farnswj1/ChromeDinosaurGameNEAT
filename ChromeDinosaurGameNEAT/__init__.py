@@ -7,9 +7,9 @@ This script runs the game contained in this package.
 '''
 
 # Imported modules
-from .gameWindow import ChromeDinosaurGame
+from .gameWindow import GameWindow
 
 
 # Run the game
 def run(enable_neat=False, night_mode=False):
-    ChromeDinosaurGame(enable_neat=enable_neat, night_mode=night_mode)
+    GameWindow(enable_neat=enable_neat, night_mode=night_mode)

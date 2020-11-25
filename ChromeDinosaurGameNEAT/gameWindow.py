@@ -13,8 +13,8 @@ from .gameEventHandler import GameEventHandler
 from .constants import WINDOW_WIDTH, WINDOW_HEIGHT, FONT_NAME, GENERATIONS
 
 
-# Chrome dinosaur window class
-class ChromeDinosaurGame(pyglet.window.Window):
+# Game window class
+class GameWindow(pyglet.window.Window):
     # Constructor
     def __init__(self, enable_neat=False, night_mode=False, *args, **kwargs):
         # Inherit the pyglet window

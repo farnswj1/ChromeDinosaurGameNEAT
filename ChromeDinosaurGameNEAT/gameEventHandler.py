@@ -14,7 +14,7 @@ import pickle
 from .gameSprite import GameSprite
 from .dinosaur import Dinosaur
 from .constants import *
-from random import random, randint, choice
+from random import uniform, randint, choice
 
 
 # Game class handles the game events
@@ -81,8 +81,8 @@ class GameEventHandler:
 
         # Add a delays to control when events happen
         self.next_score_increment = 0.1
-        self.next_cloud_spawn = 3 * random() + 1
-        self.next_obstacle_spawn = 2 * random() + 1
+        self.next_cloud_spawn = uniform(1, 4)
+        self.next_obstacle_spawn = uniform(1, 3)
         self.next_star_spawn = 0 # Spawn a star immediately
         self.next_velocity_increase = 1
 
@@ -420,14 +420,7 @@ class GameEventHandler:
             self.clouds.append(
                 GameSprite(CLOUD_IMG, 1200, randint(225, 325), velx=-150, batch=self.bg_batch)
             )
-            ''' 
-            The 2 ensures that the cloud spawns at least 2 seconds later
-            The random() function gives us a decimal number between 0 and 1 
-            so by multiplying it by 3 and adding 2 to it
-            we get a random decimal number between 3 and 5
-            The idea was to have the clouds generate randomly and within an interval of time
-            '''
-            self.next_cloud_spawn += 3 * random() + 2 # Reset delay
+            self.next_cloud_spawn += uniform(2, 5) # Reset delay
         
         # Update the obstacle spawn delay
         self.next_obstacle_spawn -= dt
@@ -453,7 +446,7 @@ class GameEventHandler:
                         batch=self.main_batch
                     )
                 )
-            self.next_obstacle_spawn = 1.5 * random() + 1 # Reset delay
+            self.next_obstacle_spawn = uniform(1, 2.5) # Reset delay
         
         # Update the star spawn delay
         self.next_star_spawn -= dt
@@ -465,7 +458,7 @@ class GameEventHandler:
                 velx=-10,
                 batch=self.bg_batch)
             )
-            self.next_star_spawn += 20 * random() + 30 # Reset delay
+            self.next_star_spawn += uniform(30, 50) # Reset delay
 
         # Update the velocity increase delay
         self.next_velocity_increase -= dt
