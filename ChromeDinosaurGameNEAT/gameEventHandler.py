@@ -181,9 +181,10 @@ class GameEventHandler:
             print(f"\nBest genome:\n{winner}")
 
             # If winner.pkl exists, save the best genome
-            if os.path.exists("winner.pkl"):
+            pkl_file = os.path.join(os.path.dirname(__file__), "winner.pkl")
+            if os.path.exists(pkl_file):
                 # Get the current genome saved in the .pkl file
-                with open("winner.pkl", "rb") as f:
+                with open(pkl_file, "rb") as f:
                     saved_genome = pickle.load(f)
                 
                 # Save the winner genome if it has a higher fitness than the saved genome
@@ -192,12 +193,12 @@ class GameEventHandler:
                         "This genome performed better than the saved genome!\n"
                         "Overwriting the saved genome with this session's best genome..."
                     )
-                    with open("winner.pkl", "wb") as f:
+                    with open(pkl_file, "wb") as f:
                         pickle.dump(winner, f)
             else:
                 # Create the .pkl file and save the winner genome
-                print("Generating winner.pkl and saving the best genome...")
-                with open("winner.pkl", "wb") as f:
+                print("Saving the best genome...")
+                with open(pkl_file, "wb") as f:
                     pickle.dump(winner, f)
     
 
