@@ -7,6 +7,7 @@ This script contains the constants used in the package.
 '''
 
 # Imported modules
+import os
 from pyglet.image import load, ImageGrid, Animation
 from itertools import cycle
 
@@ -15,11 +16,11 @@ from itertools import cycle
 WINDOW_WIDTH = 1200
 WINDOW_HEIGHT = 400
 GENERATIONS = 25
-FONT_NAME = 'ChromeDinosaurGameNEAT/data/fonts/press_start_2p.ttf'
+FONT_NAME = os.path.join(os.path.dirname(__file__), "data/fonts/press_start_2p.ttf") 
 
 
 # Sprites
-GAME_SPRITES = load("ChromeDinosaurGameNEAT/data/images/sprites.png")
+GAME_SPRITES = load(os.path.join(os.path.dirname(__file__), "data/images/sprites.png"))
 TERRAIN_IMG = GAME_SPRITES.get_region(2, 0, 2402, 27)
 DINOSAUR_RUN_ANIMATION = Animation.from_image_sequence(
     ImageGrid(GAME_SPRITES.get_region(1854, 33, 176, 95), 1, 2, item_width=88, item_height=96),
