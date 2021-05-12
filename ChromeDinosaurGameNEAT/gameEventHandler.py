@@ -89,8 +89,36 @@ class GameEventHandler:
         # Control the star opacity by increasing it at night 
         self.star_opacity = 0
 
-        # Initalize the player's dinosaur if NEAT is disabled
-        if not self.enable_neat:
+        # Initalize the player's dinosaur if NEAT is disabled. Otherwise, set up NEAT
+        if self.enable_neat:
+            # Generation label
+            self.generation = -1
+            self.generation_label = pyglet.text.Label(
+                f"GENERATION: {self.generation:02}",
+                font_name="Press Start 2P",
+                font_size=20,
+                color=(255, 255, 255, 255) if self.night_mode else (0, 0, 0, 255),
+                x=10,
+                y=WINDOW_HEIGHT - 10,
+                anchor_x="left",
+                anchor_y="top",
+                batch=self.neat_batch
+            )
+
+            # Number of dinosaurs label
+            self.number_of_dinosaurs = 0
+            self.number_of_dinosaurs_label = pyglet.text.Label(
+                f"DINOSAURS: {self.number_of_dinosaurs:03}",
+                font_name="Press Start 2P",
+                font_size=20,
+                color=(255, 255, 255, 255) if self.night_mode else (0, 0, 0, 255),
+                x=10,
+                y=WINDOW_HEIGHT - 40,
+                anchor_x="left",
+                anchor_y="top",
+                batch=self.neat_batch
+            )
+        else:
             # Generate the user's dinosaur if the user plays manually
             self.dinosaur = Dinosaur(DINOSAUR_RUN_ANIMATION, 65, 45, batch=self.main_batch)
 
@@ -143,34 +171,6 @@ class GameEventHandler:
         # Add a reporter to show progress in the terminal
         population.add_reporter(neat.StdOutReporter(True))
         population.add_reporter(neat.StatisticsReporter())
-
-        # Generation label
-        self.generation = -1
-        self.generation_label = pyglet.text.Label(
-            f"GENERATION: {self.generation:02}",
-            font_name="Press Start 2P",
-            font_size=20,
-            color=(255, 255, 255, 255) if self.night_mode else (0, 0, 0, 255),
-            x=10,
-            y=WINDOW_HEIGHT - 10,
-            anchor_x="left",
-            anchor_y="top",
-            batch=self.neat_batch
-        )
-
-        # Number of dinosaurs label
-        self.number_of_dinosaurs = 0
-        self.number_of_dinosaurs_label = pyglet.text.Label(
-            f"DINOSAURS: {self.number_of_dinosaurs:03}",
-            font_name="Press Start 2P",
-            font_size=20,
-            color=(255, 255, 255, 255) if self.night_mode else (0, 0, 0, 255),
-            x=10,
-            y=WINDOW_HEIGHT - 40,
-            anchor_x="left",
-            anchor_y="top",
-            batch=self.neat_batch
-        )
 
         # Run the NEAT algorithm and find the best "player"
         winner = population.run(self.eval_genomes, GENERATIONS)
@@ -226,20 +226,6 @@ class GameEventHandler:
                 self.game_over_batch.draw()
     
 
-    # Check if the sprites collide
-    def collide(self, sprite_1, sprite_2): 
-        # If one sprite is on left side of other, then no collision is possible
-        if sprite_1.x + sprite_1.width <= sprite_2.x or sprite_2.x + sprite_2.width <= sprite_1.x: 
-            return False
-        
-        # If one sprite is above other, then no collision is possible 
-        if sprite_1.y + sprite_1.height <= sprite_2.y or sprite_2.y + sprite_2.height <= sprite_1.y: 
-            return False
-        
-        # The only other outcome is that they overlap
-        return True
-    
-
     # Update the dinosaur
     def update_dinosaur(self, dinosaur, dt, output=None):
         # Check if the dinosaur is jumping first
@@ -292,14 +278,14 @@ class GameEventHandler:
             if self.enable_neat:
                 # Check each dinosaur for collisions
                 for dinosaur, neural_net, genome in zip(self.dinosaurs, self.neural_nets, self.genomes):
-                    if self.collide(dinosaur, obstacle):
+                    if dinosaur.collide(obstacle):
                         # Add the dinosaur genome to the list of objects to remove
                         dinosaurs_to_remove.append(dinosaur)
                         neural_nets_to_remove.append(neural_net)
                         genomes_to_remove.append(genome)
             else:
                 # Check if the user collided with any obstacles
-                if self.collide(self.dinosaur, obstacle):
+                if self.dinosaur.collide(obstacle):
                     self.user_collision = True
                     self.dinosaur.collided()
                     

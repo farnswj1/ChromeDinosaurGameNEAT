@@ -67,3 +67,17 @@ class Dinosaur(GameSprite):
         self.image = DINOSAUR_RUN_ANIMATION
         self.jumping = False
         self.ducking = False
+    
+    
+    # Check if the dinosaur runs into the obstacle
+    def collide(self, obstacle): 
+        # If one sprite is on left side of other, then no collision is possible
+        if self.x + self.width <= obstacle.x or obstacle.x + obstacle.width <= self.x: 
+            return False
+        
+        # If one sprite is above other, then no collision is possible 
+        if self.y + self.height <= obstacle.y or obstacle.y + obstacle.height <= self.y: 
+            return False
+        
+        # The only other outcome is that they overlap
+        return True
