@@ -1,29 +1,24 @@
-'''
-Justin Farnsworth
-Google Chrome Dinosaur Game (with NEAT)
-November 12, 2020
-
-This is a subclass of the sprite object in pyglet.
-'''
-
-# Imported modules
 from pyglet.sprite import Sprite
 
 
-# Subclass of the sprite class
-class GameSprite(Sprite):
-    # Constructor
+class BaseSprite(Sprite):
     def __init__(self, image, x, y, velx=0, vely=0, *args, **kwargs):
+        """Create a base sprite."""
         # Inherit the sprite class
         super().__init__(image, x, y, *args, **kwargs)
-        
+
         # Save the velocity of the sprite relative to the screen
         self.velx = velx
         self.vely = vely
-    
-    
-    # Update the sprite
+
     def update(self, dt):
-        # Update the sprite's position
+        """Update the sprite."""
         self.x += self.velx * dt
         self.y += self.vely * dt
+
+    def __del__(self):
+        """Delete the sprite."""
+        try:
+            self.delete()
+        except:
+            pass
