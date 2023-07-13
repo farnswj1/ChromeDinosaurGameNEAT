@@ -34,7 +34,8 @@ class Window(BaseWindow):
         self.fps_display = FPSDisplay(self)
         pyglet.clock.schedule_interval(self.update, 1/60)
 
-        # Run the game
+    def run(self):
+        """Run the window."""
         self.game.run()
 
     def on_key_press(self, symbol, modifiers):
