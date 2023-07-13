@@ -2,7 +2,7 @@ import pyglet
 from pyglet.window import key, Window as BaseWindow
 from .hud import FPSDisplay
 from ..event_handlers import PlayerEventHandler, NEATEventHandler
-from ..constants import WINDOW_WIDTH, WINDOW_HEIGHT, FONT_FILE_NAME, FONT_NAME, GENERATIONS
+from ..constants import WINDOW_WIDTH, WINDOW_HEIGHT, FONT_FILE_NAME, FONT_NAME
 
 
 class Window(BaseWindow):
@@ -65,5 +65,5 @@ class Window(BaseWindow):
 
     def on_close(self):
         """Terminate the game if the window is closed."""
-        self.game.user_exit = True
+        self.game.on_close()
         super().on_close()

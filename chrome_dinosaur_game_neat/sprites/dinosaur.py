@@ -132,11 +132,12 @@ class DinosaurAI(Dinosaur):
     def think(self, obstacle):
         """Let the AI make a decision by itself."""
         return self.neural_net.activate((
-            self.y,  # Dinosaur's y-coordinate
-            obstacle.y,  # Obstacle's y-coordinate
-            obstacle.width,  # Width of the obstacle
-            obstacle.height,  # Height of the obstacle
-            abs(self.x + self.width - obstacle.x)  # Distance
+            self.y,
+            obstacle.y,
+            obstacle.width,
+            obstacle.height,
+            abs(self.x + self.width - obstacle.x),  # Distance
+            obstacle.velx
         )) if obstacle else None
 
     def reward(self, dt):

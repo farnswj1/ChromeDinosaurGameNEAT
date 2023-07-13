@@ -1,2 +1,2 @@
-from .player_event_handler import PlayerEventHandler
-from .neat_event_handler import NEATEventHandler
+from .player import PlayerEventHandler
+from .neat import NEATEventHandler

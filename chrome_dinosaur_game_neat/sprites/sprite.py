@@ -19,6 +19,7 @@ class BaseSprite(Sprite):
     def __del__(self):
         """Delete the sprite."""
         try:
+            # Attempt to delete the sprite from video memory if available
             self.delete()
         except:
             pass

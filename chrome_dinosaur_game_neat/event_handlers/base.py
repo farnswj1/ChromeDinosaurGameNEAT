@@ -89,6 +89,7 @@ class BaseEventHandler:
                 obstacle.update(dt)
 
         for obstacle in obstacles_to_remove:
+            obstacle.delete()
             self.obstacles.remove(obstacle)
 
     def update_terrain(self, dt):
@@ -108,6 +109,7 @@ class BaseEventHandler:
                 cloud.update(dt)
 
         for cloud in clouds_to_remove:
+            cloud.delete()
             self.clouds.remove(cloud)
 
     def update_moon(self, dt):
@@ -133,6 +135,7 @@ class BaseEventHandler:
                 star.update(dt, self.star_opacity)
 
         for star in stars_to_remove:
+            star.delete()
             self.stars.remove(star)
 
     def update_score(self, dt):
@@ -219,6 +222,10 @@ class BaseEventHandler:
 
     def reset(self):
         """Reset the game."""
+        # Forcibly delete the sprites from video memory
+        for obstacle in self.obstacles:
+            obstacle.delete()
+
         self.obstacles.clear()
         self.score_display.set(0)
 
@@ -227,3 +234,21 @@ class BaseEventHandler:
 
         for terrain in self.terrain:
             terrain.velx = self.obstacle_velx
+
+    def on_close(self):
+        """Close the game."""
+        self.user_exit = True
+
+        for terrain in self.terrain:
+            terrain.delete()
+
+        for cloud in self.clouds:
+            cloud.delete()
+
+        for obstacle in self.obstacles:
+            obstacle.delete()
+
+        for star in self.stars:
+            star.delete()
+
+        self.moon.delete()

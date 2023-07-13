@@ -1,6 +1,6 @@
 from ..sprites import DinosaurAI
 from ..ui.hud import DinosaurCountDisplay, GenerationDisplay
-from .base_event_handler import BaseEventHandler
+from .base import BaseEventHandler
 from ..libs.neat import Population
 from ..constants import GENERATIONS, POPULATION_SIZE
 import pyglet
@@ -73,6 +73,7 @@ class NEATEventHandler(BaseEventHandler):
 
         # Delete the dinosaurs that collided with an obstacle
         for dinosaur in dinosaurs_to_remove:
+            dinosaur.delete()
             self.dinosaurs.remove(dinosaur)
 
             # Decrement the number of dinosaurs left and check if any remain
@@ -113,3 +114,10 @@ class NEATEventHandler(BaseEventHandler):
         """Reset the game."""
         super().reset()
         self.dinosaur_count_display.set(POPULATION_SIZE)
+
+    def on_close(self):
+        """Close the game."""
+        super().on_close()
+
+        for dinosaur in self.dinosaurs:
+            dinosaur.delete()

@@ -1,7 +1,7 @@
 from pyglet.window import key, mouse
 from ..sprites import Dinosaur
 from ..ui.hud import GameOverDisplay, ResetButton
-from .base_event_handler import BaseEventHandler
+from .base import BaseEventHandler
 import pyglet
 
 
@@ -86,3 +86,9 @@ class PlayerEventHandler(BaseEventHandler):
         super().reset()
         self.dinosaur.reset(45)
         self.user_collision = False
+
+    def on_close(self):
+        """Close the game."""
+        super().on_close()
+        self.dinosaur.delete()
+        self.reset_button.delete()
