@@ -20,21 +20,21 @@ class BaseEventHandler:
         # Control the horizontal velocity of the obstacles
         self.obstacle_velx = -600
 
-        # Create batches
-        self.bg_batch = pyglet.graphics.Batch()
-        self.main_batch = pyglet.graphics.Batch()
-        self.hud_batch = pyglet.graphics.Batch()
-        self.game_over_batch = pyglet.graphics.Batch()
+        # Create batches and groups
+        self.batch = pyglet.graphics.Batch()
+        self.background = pyglet.graphics.OrderedGroup(0)
+        self.foreground = pyglet.graphics.OrderedGroup(1)
+        self.hud = pyglet.graphics.OrderedGroup(2)
 
         # Score and label
-        self.score_display = ScoreDisplay(self.hud_batch, night_mode)
+        self.score_display = ScoreDisplay(self.batch, self.hud, night_mode)
 
         # Initialize the sprites
         self.terrain = [
-            Terrain(0, 50, velx=self.obstacle_velx, batch=self.bg_batch),
-            Terrain(2400, 50, velx=self.obstacle_velx, batch=self.bg_batch)
+            Terrain(0, 50, velx=self.obstacle_velx, batch=self.batch, group=self.background),
+            Terrain(2400, 50, velx=self.obstacle_velx, batch=self.batch, group=self.background)
         ]
-        self.moon = Moon(2920, 275, velx=-20, batch=self.bg_batch)
+        self.moon = Moon(2920, 275, velx=-20, batch=self.batch, group=self.background)
 
         # These elements will be randomly generated as the game progresses
         self.clouds = []
@@ -69,9 +69,7 @@ class BaseEventHandler:
 
     def draw(self):
         """Draw the contents of the game onto the window."""
-        self.bg_batch.draw()
-        self.main_batch.draw()
-        self.hud_batch.draw()
+        self.batch.draw()
 
     def update_dinosaurs(self, dt):
         """Update the dinosaur."""
@@ -151,7 +149,13 @@ class BaseEventHandler:
         self.next_cloud_spawn -= dt
 
         if self.next_cloud_spawn <= 0:
-            cloud = Cloud(1200, randint(225, 325), velx=-150, batch=self.bg_batch)
+            cloud = Cloud(
+                1200,
+                randint(225, 325),
+                velx=-150,
+                batch=self.batch,
+                group=self.background
+            )
             self.clouds.append(cloud)
             self.next_cloud_spawn += uniform(2, 5)
 
@@ -167,7 +171,8 @@ class BaseEventHandler:
                     1200,
                     choice((50, 125, 200)),
                     velx=self.obstacle_velx - 100,
-                    batch=self.main_batch
+                    batch=self.batch,
+                    group=self.foreground
                 )
                 self.obstacles.append(bird)
             else:
@@ -175,7 +180,8 @@ class BaseEventHandler:
                     1200,
                     45,
                     velx=self.obstacle_velx,
-                    batch=self.main_batch
+                    batch=self.batch,
+                    group=self.foreground
                 )
                 self.obstacles.append(cactus)
 
@@ -186,7 +192,13 @@ class BaseEventHandler:
         self.next_star_spawn -= dt
 
         if self.next_star_spawn <= 0:
-            star = Star(1200, randint(200, 350), velx=-10, batch=self.bg_batch)
+            star = Star(
+                1200,
+                randint(200, 350),
+                velx=-10,
+                batch=self.batch,
+                group=self.background
+            )
             self.stars.append(star)
             self.next_star_spawn += uniform(30, 50)
 

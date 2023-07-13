@@ -3,7 +3,7 @@ from ...constants import FONT_NAME, POPULATION_SIZE, WINDOW_HEIGHT
 
 
 class DinosaurCountDisplay(Label):
-    def __init__(self, batch, night_mode=False):
+    def __init__(self, batch, group, night_mode=False):
         """Create a HUD item that shows the number of dinosaurs."""
         self.dinosaur_count = POPULATION_SIZE
         super().__init__(
@@ -15,7 +15,8 @@ class DinosaurCountDisplay(Label):
             y=WINDOW_HEIGHT - 40,
             anchor_x="left",
             anchor_y="top",
-            batch=batch
+            batch=batch,
+            group=group
         )
 
     def increment(self, value):

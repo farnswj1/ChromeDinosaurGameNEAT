@@ -3,7 +3,7 @@ from ...constants import WINDOW_WIDTH, WINDOW_HEIGHT, FONT_NAME
 
 
 class GameOverDisplay(Label):
-    def __init__(self, batch, night_mode=False):
+    def __init__(self, batch, group, night_mode=False):
         """Create a Game Over button."""
         super().__init__(
             "G A M E  O V E R",
@@ -14,5 +14,6 @@ class GameOverDisplay(Label):
             y=WINDOW_HEIGHT / 2 + 100,
             anchor_x="center",
             anchor_y="center",
-            batch=batch
+            batch=batch,
+            group=group
         )

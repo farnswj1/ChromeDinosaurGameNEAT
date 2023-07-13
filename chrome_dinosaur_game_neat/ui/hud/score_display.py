@@ -3,7 +3,7 @@ from ...constants import WINDOW_WIDTH, WINDOW_HEIGHT, FONT_NAME
 
 
 class ScoreDisplay(Label):
-    def __init__(self, batch, night_mode=False):
+    def __init__(self, batch, group, night_mode=False):
         """Create a HUD item that shows the score."""
         self.score = 0
         super().__init__(
@@ -15,7 +15,8 @@ class ScoreDisplay(Label):
             y=WINDOW_HEIGHT - 10,
             anchor_x="right",
             anchor_y="top",
-            batch=batch
+            batch=batch,
+            group=group
         )
 
     def increment(self, value):

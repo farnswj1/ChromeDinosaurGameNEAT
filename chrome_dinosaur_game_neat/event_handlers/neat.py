@@ -15,10 +15,10 @@ class NEATEventHandler(BaseEventHandler):
         super().__init__(night_mode=night_mode)
 
         # Generation label
-        self.generation_display = GenerationDisplay(self.hud_batch, night_mode)
+        self.generation_display = GenerationDisplay(self.batch, self.hud, night_mode)
 
         # Number of dinosaurs label
-        self.dinosaur_count_display = DinosaurCountDisplay(self.hud_batch, night_mode)
+        self.dinosaur_count_display = DinosaurCountDisplay(self.batch, self.hud, night_mode)
 
     def run(self):
         """Set up and run the game with the NEAT algorithm."""
@@ -104,7 +104,14 @@ class NEATEventHandler(BaseEventHandler):
 
         self.generation_display.increment(1)
         self.dinosaurs = [
-            DinosaurAI(65, 45, genome=genome, config=config, batch=self.main_batch)
+            DinosaurAI(
+                65,
+                45,
+                genome=genome,
+                config=config,
+                batch=self.batch,
+                group=self.foreground
+            )
             for _, genome in genomes
         ]
 

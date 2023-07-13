@@ -10,8 +10,12 @@ class PlayerEventHandler(BaseEventHandler):
         """Create an event handler that allows the user to play the game manually."""
         super().__init__(night_mode=night_mode)
 
+        # Create a game over group
+        self.game_over_group = pyglet.graphics.OrderedGroup(3)
+        self.game_over_group.visible = False
+
         # Generate the user's dinosaur
-        self.dinosaur = Dinosaur(65, 45, batch=self.main_batch)
+        self.dinosaur = Dinosaur(65, 45, batch=self.batch, group=self.foreground)
 
         # Set variables to track user inputs
         self.trigger_duck = False
@@ -21,8 +25,8 @@ class PlayerEventHandler(BaseEventHandler):
         self.user_collision = False
 
         # Player HUD
-        self.game_over_label = GameOverDisplay(self.game_over_batch, night_mode)
-        self.reset_button = ResetButton(564, 150, batch=self.game_over_batch)
+        self.game_over_label = GameOverDisplay(self.batch, self.game_over_group, night_mode)
+        self.reset_button = ResetButton(564, 150, batch=self.batch, group=self.game_over_group)
 
     @staticmethod
     def run():
@@ -54,19 +58,13 @@ class PlayerEventHandler(BaseEventHandler):
         if button == mouse.LEFT and self.user_collision and self.reset_button.clicked(x, y):
             self.reset()
 
-    def draw(self):
-        """Draw the contents of the game onto the window."""
-        super().draw()
-
-        if self.user_collision:
-            self.game_over_batch.draw()
-
     def update_dinosaurs(self, dt):
         """Update the dinosaurs."""
         for obstacle in self.obstacles:
             # Check if the dinosaur collided with any obstacles
             if self.dinosaur.has_collided(obstacle):
                 self.user_collision = True
+                self.game_over_group.visible = True
                 self.dinosaur.collided()
                 return
 
@@ -86,6 +84,7 @@ class PlayerEventHandler(BaseEventHandler):
         super().reset()
         self.dinosaur.reset(45)
         self.user_collision = False
+        self.game_over_group.visible = False
 
     def on_close(self):
         """Close the game."""
