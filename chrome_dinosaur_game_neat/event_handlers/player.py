@@ -1,6 +1,6 @@
 from pyglet.window import key, mouse
 from ..sprites import Dinosaur
-from ..ui.hud import GameOverDisplay, ResetButton
+from ..gui.hud import GameOverDisplay, ResetButton
 from .base import BaseEventHandler
 import pyglet
 

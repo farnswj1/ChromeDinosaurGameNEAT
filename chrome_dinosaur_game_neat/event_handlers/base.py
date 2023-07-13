@@ -7,7 +7,7 @@ from ..sprites import (
     Star,
     Terrain
 )
-from ..ui.hud import ScoreDisplay
+from ..gui.hud import ScoreDisplay
 from random import uniform, randint, choice
 
 

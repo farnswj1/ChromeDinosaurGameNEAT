@@ -1,5 +1,5 @@
 from ..sprites import DinosaurAI
-from ..ui.hud import DinosaurCountDisplay, GenerationDisplay
+from ..gui.hud import DinosaurCountDisplay, GenerationDisplay
 from .base import BaseEventHandler
 from ..libs.neat import Population
 from ..constants import GENERATIONS, POPULATION_SIZE

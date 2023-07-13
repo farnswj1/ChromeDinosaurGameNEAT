@@ -1,4 +1,4 @@
-from .ui.window import Window
+from .gui.window import Window
 
 
 def run(enable_neat=False, night_mode=False):
